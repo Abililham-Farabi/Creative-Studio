@@ -4,7 +4,126 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>LUMINA | Avant-Garde Studio</title>
-    <link rel="stylesheet" href="style.css">
+    <style>
+        :root {
+            --bg-color: #f4f0ea; /* Warm beige mewah */
+            --text-color: #0a0a0a; /* Deep black */
+            --glass-bg: rgba(255, 255, 255, 0.4);
+            --glass-border: rgba(255, 255, 255, 0.8);
+            --font-sans: 'Helvetica Neue', Arial, sans-serif;
+            --font-serif: 'Playfair Display', Georgia, serif; 
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; cursor: none; }
+
+        body { 
+            background-color: var(--bg-color); 
+            color: var(--text-color); 
+            font-family: var(--font-sans); 
+            overflow-x: hidden; 
+        }
+
+        /* CSS Noise Texture */
+        .noise-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; pointer-events: none; z-index: 9999; opacity: 0.04; background-image: url('data:image/svg+xml;utf8,%3Csvg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"%3E%3Cfilter id="noiseFilter"%3E%3CfeTurbulence type="fractalNoise" baseFrequency="0.65" numOctaves="3" stitchTiles="stitch"/%3E%3C/filter%3E%3Crect width="100%25" height="100%25" filter="url(%23noiseFilter)"/%3E%3C/svg%3E'); }
+
+        /* Custom Cursor */
+        .cursor-dot { width: 6px; height: 6px; background: var(--text-color); border-radius: 50%; position: fixed; pointer-events: none; z-index: 10000; transform: translate(-50%, -50%); transition: transform 0.2s; }
+        .cursor-trail { width: 30px; height: 30px; border: 1px solid rgba(0,0,0,0.3); border-radius: 50%; position: fixed; pointer-events: none; z-index: 9999; transform: translate(-50%, -50%); transition: width 0.3s, height 0.3s, top 0.1s, left 0.1s; mix-blend-mode: difference; }
+
+        /* Navbar */
+        .navbar { display: flex; justify-content: space-between; padding: 40px 5%; position: absolute; width: 100%; top: 0; z-index: 100; mix-blend-mode: difference; color: #fff; }
+        .logo { font-size: 1.2rem; font-weight: bold; letter-spacing: 2px; }
+        .menu-link { font-size: 0.9rem; text-transform: uppercase; letter-spacing: 1px; }
+
+        /* Hero Section */
+        .hero { min-height: 100vh; display: flex; flex-direction: column; justify-content: flex-end; padding: 100px 5% 50px; position: relative; }
+        .hero-text { position: relative; z-index: 10; margin-bottom: 50px; }
+        .hero h1 { font-size: clamp(3rem, 9vw, 8rem); line-height: 0.85; letter-spacing: -2px; text-transform: uppercase; }
+        .italic-serif { font-family: var(--font-serif); font-style: italic; font-weight: 300; letter-spacing: 0; text-transform: none; padding-left: 10vw; display: inline-block;}
+        .hero-meta { display: flex; justify-content: space-between; align-items: flex-end; margin-top: 40px; border-top: 1px solid rgba(0,0,0,0.1); padding-top: 20px; }
+        .hero-meta p { max-width: 400px; font-size: 1.1rem; line-height: 1.5; color: #444; }
+
+        /* Spinning SVG Animation */
+        .spinning-star { animation: spinSlow 10s linear infinite; flex-shrink: 0; }
+        @keyframes spinSlow { 100% { transform: rotate(360deg); } }
+
+        /* Hero Parallax Image */
+        .hero-image-wrapper { position: absolute; top: 0; right: 5%; width: 45%; height: 75vh; overflow: hidden; z-index: 1; }
+        .hero-image-wrapper::after { content: ''; position: absolute; inset: 0; border: 1px solid rgba(0,0,0,0.1); z-index: 2; pointer-events: none; }
+        .parallax-img { width: 100%; height: 130%; object-fit: cover; transform: translateY(-15%); will-change: transform; transition: transform 0.1s cubic-bezier(0.2, 0, 0.2, 1); filter: grayscale(20%); }
+
+        /* CSS Marquee */
+        .marquee-container { border-top: 1px solid rgba(0,0,0,0.1); border-bottom: 1px solid rgba(0,0,0,0.1); padding: 20px 0; overflow: hidden; background: var(--bg-color); }
+        .marquee-content { display: flex; white-space: nowrap; animation: scrollMarquee 20s linear infinite; font-size: clamp(1rem, 3vw, 1.5rem); font-family: var(--font-serif); font-style: italic; }
+        @keyframes scrollMarquee { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+
+        /* Asymmetrical Grid */
+        .portfolio { padding: 150px 5%; }
+        .section-title { font-size: clamp(2rem, 5vw, 4rem); margin-bottom: 80px; letter-spacing: -1px; }
+        .asymmetric-grid { display: grid; grid-template-columns: repeat(12, 1fr); gap: 40px; }
+        .grid-item { position: relative; }
+        .card-tall { grid-column: 1 / 6; height: 800px; margin-top: 100px; }
+        .card-square { grid-column: 7 / 13; height: 500px; }
+        .card-wide { grid-column: 3 / 11; height: 600px; margin-top: 50px; }
+
+        /* Image Containers & Hover Effects */
+        .img-container { width: 100%; height: 100%; overflow: hidden; border-radius: 4px; position: relative; }
+        .img-container::after { content: ''; position: absolute; inset: 0; border: 1px solid rgba(0,0,0,0.05); border-radius: 4px; pointer-events: none; }
+        .grid-item:hover .parallax-img { filter: grayscale(0%); transform: scale(1.05) translateY(-10%); transition: transform 1.5s cubic-bezier(0.16, 1, 0.3, 1), filter 0.5s; }
+
+        /* Light Glassmorphism Label */
+        .glass-label { position: absolute; bottom: -20px; right: -20px; background: var(--glass-bg); backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px); border: 1px solid var(--glass-border); padding: 20px 30px; border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); z-index: 10; transition: transform 0.4s; }
+        .grid-item:hover .glass-label { transform: translate(-10px, -10px); }
+        .glass-label h3 { font-size: 1.5rem; letter-spacing: -0.5px; margin-bottom: 5px; }
+        .glass-label p { font-size: 0.9rem; color: #666; text-transform: uppercase; letter-spacing: 1px; }
+
+        /* Footer Mega */
+        .footer-mega { height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; background-color: var(--text-color); color: var(--bg-color); text-align: center; padding: 5%; }
+        .giant-text { font-size: clamp(3rem, 12vw, 10rem); line-height: 1; letter-spacing: -2px; text-transform: uppercase; margin-bottom: 40px; }
+        .btn-magnetic { display: inline-block; padding: 20px 40px; border: 1px solid var(--bg-color); border-radius: 50px; color: var(--bg-color); text-decoration: none; font-size: 1.2rem; transition: background 0.3s, color 0.3s; position: relative; overflow: hidden; }
+        .btn-magnetic:hover { background: var(--bg-color); color: var(--text-color); }
+
+        /* Global Animations */
+        .reveal-text { opacity: 0; transform: translateY(40px); transition: opacity 1s ease, transform 1.2s cubic-bezier(0.16, 1, 0.3, 1); }
+        .reveal-text.active { opacity: 1; transform: translateY(0); }
+        .reveal-up { opacity: 0; transform: translateY(80px); transition: opacity 1.2s ease, transform 1.4s cubic-bezier(0.16, 1, 0.3, 1); }
+        .reveal-up.active { opacity: 1; transform: translateY(0); }
+
+        /* --- RESPONSIVE ADJUSTMENTS --- */
+        @media (max-width: 1024px) {
+            .card-tall { height: 600px; }
+            .card-square { height: 400px; }
+            .card-wide { height: 450px; }
+            .hero-image-wrapper { width: 50%; }
+            .hero h1 { font-size: 7vw; }
+        }
+
+        @media (max-width: 768px) {
+            * { cursor: auto; } /* Matikan custom cursor di mobile */
+            .cursor-dot, .cursor-trail { display: none; }
+            
+            .navbar { padding: 20px 5%; }
+            
+            .hero { justify-content: flex-start; padding-top: 120px; }
+            .hero h1 { font-size: 3.5rem; letter-spacing: -1px; }
+            .italic-serif { padding-left: 0; margin-top: 10px; }
+            .hero-meta { flex-direction: column; align-items: flex-start; gap: 20px; }
+            .hero-meta p { font-size: 1rem; }
+            
+            .hero-image-wrapper { position: relative; width: 100%; height: 50vh; right: 0; margin-top: 40px; }
+            
+            .portfolio { padding: 80px 5%; }
+            .section-title { margin-bottom: 40px; text-align: center; }
+            
+            .asymmetric-grid { display: flex; flex-direction: column; gap: 60px; }
+            .card-tall, .card-square, .card-wide { height: 50vh; min-height: 350px; margin-top: 0; }
+            
+            .glass-label { right: 10px; bottom: -20px; padding: 15px 20px; width: calc(100% - 20px); text-align: center; backdrop-filter: blur(15px); }
+            
+            .giant-text { font-size: 4rem; letter-spacing: -1px; }
+            .btn-magnetic { padding: 15px 30px; font-size: 1rem; }
+        }
+    </style>
 </head>
 <body>
     <div class="noise-overlay"></div>
@@ -83,6 +202,68 @@
         <a href="#" class="btn-magnetic"><span>Start a Project</span></a>
     </footer>
 
-    <script src="script.js"></script>
+    <script>
+        // 1. Custom Cursor & Hover States (Dibatasi agar tidak error di mobile)
+        const dot = document.querySelector('.cursor-dot');
+        const trail = document.querySelector('.cursor-trail');
+        const interactives = document.querySelectorAll('a, .grid-item, .hero-image-wrapper');
+
+        // Cek jika ini bukan touch device
+        if (window.matchMedia("(pointer: fine)").matches) {
+            window.addEventListener('mousemove', (e) => {
+                const x = e.clientX;
+                const y = e.clientY;
+                dot.style.left = `${x}px`;
+                dot.style.top = `${y}px`;
+                trail.style.left = `${x}px`;
+                trail.style.top = `${y}px`;
+            });
+
+            interactives.forEach(el => {
+                el.addEventListener('mouseenter', () => {
+                    trail.style.width = '80px';
+                    trail.style.height = '80px';
+                    trail.style.backgroundColor = 'rgba(0,0,0,0.05)';
+                    dot.style.transform = 'translate(-50%, -50%) scale(0)';
+                });
+                el.addEventListener('mouseleave', () => {
+                    trail.style.width = '30px';
+                    trail.style.height = '30px';
+                    trail.style.backgroundColor = 'transparent';
+                    dot.style.transform = 'translate(-50%, -50%) scale(1)';
+                });
+            });
+        }
+
+        // 2. Parallax Effect on Scroll
+        const parallaxImages = document.querySelectorAll('.parallax-img');
+        window.addEventListener('scroll', () => {
+            let scrolled = window.pageYOffset;
+            parallaxImages.forEach(img => {
+                const speed = 0.15;
+                const yPos = -(scrolled * speed); 
+                img.style.transform = `translateY(${yPos}px) scale(1.1)`; 
+            });
+        });
+
+        // 3. Staggered Scroll Reveal
+        const observerOptions = {
+            root: null,
+            threshold: 0.1,
+            rootMargin: "0px 0px -50px 0px"
+        };
+
+        const revealElements = document.querySelectorAll('.reveal-text, .reveal-up');
+        const observer = new IntersectionObserver((entries, obs) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('active');
+                    obs.unobserve(entry.target); 
+                }
+            });
+        }, observerOptions);
+
+        revealElements.forEach(el => observer.observe(el));
+    </script>
 </body>
 </html>
